@@ -1,55 +1,37 @@
 import pKinect.PKinect; 
 import pKinect.SkeletonData; 
+import processing.video.*; 
+import processing.core.*;
 
-/************kinect vars **********************/
+public class KinectOn{
 PKinect kinect; 
 ArrayList<SkeletonData> bodies; 
 PImage img;
 PImage prevFrame; 
+float headX = 0.0; 
+float headZ = 0.0; 
+float handRX =0.0; 
+float handRY = 0.0; 
+float handLX = 0.0; 
+float handLY = 0.0; 
+PApplet p; 
 
 boolean near = false; 
 SkeletonData closest; 
 boolean hasPersonEntered = false;
-int player1Head; 
-PVector player1RightHand; 
-PVector player1LeftHand; 
 
-PVector player2Head;
-PVector player2RightHand; 
-PVector player2LeftHand; 
-
-float headX, headY, headZ; 
-//switch me on and off 
-boolean kinectRun = true;  
-
-/*end kinect vars*/ 
-
-
-void setup() {
-  
-  size(960, 540);
-  //test for kinect 
-  if(kinectRun)
-  { 
+  //contstruct
+  public KinectOn(PApplet p_){
+    p = p_; 
     bodies = new ArrayList<SkeletonData>(); 
     img = createImage(320,240, ARGB); 
-    kinectInit();
+    init();
     println("init");
-   } 
-
-}
-void draw() {
-//  println(frameRate);
-  background(0);
- if(kinectRun) kinectUpdate(); 
-
-} 
-
-
-//KINECT CODE HERE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  public void kinectInit() {
+  } 
+  
+  public void init() {
     
-    kinect = new PKinect(this);  
+    kinect = new PKinect(p);  
     println(kinect); 
     prevFrame = createImage(320,240,ARGB); 
   
@@ -77,14 +59,6 @@ void draw() {
     //if there is more than one player, figure out which to track
     if(bodies.size() > 1){
     drawPosition(bodies.get(i)); 
-    drawSkeleton(bodies.get(i));
-
-//    player1Head = PKinect.NUI_SKELETON_POSITION_HAND_LEFT; 
-//    player1LeftHand = PKinect.NUI_SKELETON_POSITION_HAND_LEFT;
-//    player1RightHand = PKinect.NUI_SKELETON_POSITION_HAND_RIGHT;
-      //playerLeftHand.add(  PKinect.NUI_SKELETON_POSITION_HAND_LEFT);
-      //playerRightHand.add(  PKinect.NUI_SKELETON_POSITION_HAND_RIGHT);  
- 
       //see who is closer 
           if(testbody.position.z < bodies.get(i).position.z)
           {
@@ -100,16 +74,12 @@ void draw() {
           headX = bodies.get(i).position.x; 
           headZ = bodies.get(i).position.z;  
           drawPosition(bodies.get(i)); 
-         
           //println("the body in position" + i + " is closest");
         }     
         //println("bodyz: "+ closest.position.z);     
       } 
   }
   
-
- 
- 
   //sets a z axis trigger if a body is detected 
   void zAxis(){
     if(bodies.size() >= 1) {
@@ -121,7 +91,7 @@ void draw() {
     }
   } 
   
-  public void kinectUpdate(){
+  public void update(){
       /**** KINECT SETUP *********/ 
   
     if (bodies.size() >=1) {
@@ -166,51 +136,7 @@ void draw() {
     text(s1, _s.position.x*width/2, _s.position.y*height/2);
   }
   
-  void drawSkeleton(SkeletonData _s) 
-{
-  // Body
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_HEAD, 
-  PKinect.NUI_SKELETON_POSITION_SHOULDER_CENTER); 
   
-  // Left Arm
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_SHOULDER_LEFT, 
-  PKinect.NUI_SKELETON_POSITION_ELBOW_LEFT);
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_ELBOW_LEFT, 
-  PKinect.NUI_SKELETON_POSITION_WRIST_LEFT);
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_WRIST_LEFT, 
-  PKinect.NUI_SKELETON_POSITION_HAND_LEFT);
- 
-  // Right Arm
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_SHOULDER_RIGHT, 
-  PKinect.NUI_SKELETON_POSITION_ELBOW_RIGHT);
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_ELBOW_RIGHT, 
-  PKinect.NUI_SKELETON_POSITION_WRIST_RIGHT);
-  DrawBone(_s, 
-  PKinect.NUI_SKELETON_POSITION_WRIST_RIGHT, 
-  PKinect.NUI_SKELETON_POSITION_HAND_RIGHT);
- 
-
-}
- 
-void DrawBone(SkeletonData _s, int _j1, int _j2) 
-{
-  noFill();
-  stroke(255, 255, 0);
-  if (_s.skeletonPositionTrackingState[_j1] != PKinect.NUI_SKELETON_POSITION_NOT_TRACKED &&
-    _s.skeletonPositionTrackingState[_j2] != PKinect.NUI_SKELETON_POSITION_NOT_TRACKED) {
-    line(_s.skeletonPositions[_j1].x*width/2, 
-    _s.skeletonPositions[_j1].y*height/2, 
-    _s.skeletonPositions[_j2].x*width/2, 
-    _s.skeletonPositions[_j2].y*height/2);
-  }
-}
- 
   ///default sdk kinect requirements 
   void appearEvent(SkeletonData _s)
   {
@@ -223,12 +149,9 @@ void DrawBone(SkeletonData _s, int _j1, int _j2)
     synchronized(bodies)
     {
       bodies.add(_s);
-    
-  }  
-    
+    }
   }
   
-
   void disappearEvent(SkeletonData _s) {
     synchronized(bodies)
     {
@@ -240,3 +163,6 @@ void DrawBone(SkeletonData _s, int _j1, int _j2)
       }
     }
   }
+  
+  }
+
